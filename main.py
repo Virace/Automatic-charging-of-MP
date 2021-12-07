@@ -4,7 +4,7 @@
 # @Site    : x-item.com
 # @Software: PyCharm
 # @Create  : 2021/11/25 15:42
-# @Update  : 2021/12/7 17:17
+# @Update  : 2021/12/7 17:24
 # @Detail  : 自动充电
 
 import logging
@@ -88,7 +88,7 @@ def main():
         result = power.off()
         msg_push(f'充电完成, 开关状态变更: {result}')
 
-    elif temperature >= TT:
+    elif temperature >= TT * 10:
         # 44° 温度过高通知
         if not os.path.exists(target):
             os.system(f'echo 1 > {target}')
