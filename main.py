@@ -4,7 +4,7 @@
 # @Site    : x-item.com
 # @Software: PyCharm
 # @Create  : 2021/11/25 15:42
-# @Update  : 2021/12/7 16:52
+# @Update  : 2021/12/7 17:17
 # @Detail  : 自动充电
 
 import logging
@@ -13,7 +13,7 @@ import subprocess
 import sys
 
 from Plug.gosund import GosundPlug
-from config import LOCAL_IP, PLUG_IP, PLUG_TOKEN, REMOTE_IP, WX_TOKEN
+from config import LOCAL_IP, PLUG_IP, PLUG_TOKEN, REMOTE_IP, WX_TOKEN, MIN_POWER, MAX_POWER, TT
 from push import wxpusher_push
 
 logging.basicConfig(
@@ -75,27 +75,27 @@ def main():
     # 电池温度
     temperature = int(data['temperature'])
     status = True if int(data['status']) == 2 else False
-    log.debug(f'AC: {ac}, CHARGE: {charge}, STATE: {status}, TP: {temperature/10}')
+    log.debug(f'AC: {ac}, CHARGE: {charge}, STATE: {status}, TP: {temperature / 10}')
 
     # 温度文件
     target = 'py.ht'
 
-    if charge <= 30 and ac is False:
+    if charge <= MIN_POWER and ac is False:
         result = power.on()
         msg_push(f'开始充电, 开关状态变更: {result}')
 
-    elif charge >= 90 and ac is True:
+    elif charge >= MAX_POWER and ac is True:
         result = power.off()
         msg_push(f'充电完成, 开关状态变更: {result}')
 
-    elif temperature >= 440:
+    elif temperature >= TT:
         # 44° 温度过高通知
         if not os.path.exists(target):
             os.system(f'echo 1 > {target}')
         else:
             with open(target, 'r+') as f:
                 count = int(f.read())
-                log.warning(f'temperature anomaly, count: {count+1}')
+                log.warning(f'temperature anomaly, count: {count + 1}')
                 if count >= 5:
                     f.seek(0)
                     f.write('0')
