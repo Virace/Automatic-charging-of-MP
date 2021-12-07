@@ -4,7 +4,7 @@
 # @Site    : x-item.com
 # @Software: PyCharm
 # @Create  : 2021/11/25 15:42
-# @Update  : 2021/12/7 17:24
+# @Update  : 2021/12/7 21:56
 # @Detail  : 自动充电
 
 import logging
@@ -13,12 +13,12 @@ import subprocess
 import sys
 
 from Plug.gosund import GosundPlug
-from config import LOCAL_IP, PLUG_IP, PLUG_TOKEN, REMOTE_IP, WX_TOKEN, MIN_POWER, MAX_POWER, TT
+from config import LOCAL_IP, PLUG_IP, PLUG_TOKEN, REMOTE_IP, WX_TOKEN, MIN_POWER, MAX_POWER, TT, TTC
 from push import wxpusher_push
 
 logging.basicConfig(
     level=logging.DEBUG,
-    filename='main.log',
+    filename=os.path.join(os.path.dirname(__file__), 'main.log'),
     filemode='a',
     encoding='utf-8',
     format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
@@ -96,12 +96,12 @@ def main():
             with open(target, 'r+') as f:
                 count = int(f.read())
                 log.warning(f'temperature anomaly, count: {count + 1}')
-                if count >= 5:
+                if count >= TTC:
                     f.seek(0)
                     f.write('0')
                     if ac is True:
                         result = power.off()
-                    msg_push(f'目前温度异常，请及时检查。温度: {temperature / 10}°, 已操作开关: {result}')
+                    msg_push(f'目前温度异常，请及时检查。温度: {temperature / 10}°, 已关闭开关: {result}')
                 else:
                     f.seek(0)
                     f.write(str(count + 1))
