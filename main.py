@@ -4,7 +4,7 @@
 # @Site    : x-item.com
 # @Software: PyCharm
 # @Create  : 2021/11/25 15:42
-# @Update  : 2021/12/7 22:27
+# @Update  : 2021/12/8 18:12
 # @Detail  : 自动充电
 
 import logging
@@ -13,7 +13,7 @@ import subprocess
 import sys
 
 from Plug.gosund import GosundPlug
-from config import LOCAL_IP, PLUG_IP, PLUG_TOKEN, REMOTE_IP, WX_TOKEN, MIN_POWER, MAX_POWER, MIN_TT, MAX_POWER, TTC
+from config import LOCAL_IP, MAX_POWER, MAX_TT, MIN_POWER, MIN_TT, PLUG_IP, PLUG_TOKEN, REMOTE_IP, TTC, WX_TOKEN
 from push import wxpusher_push
 
 logging.basicConfig(
@@ -88,7 +88,7 @@ def main():
         result = power.off()
         msg_push(f'充电完成, 开关状态变更: {result}')
 
-    elif temperature >= MAX_POWER * 10:
+    elif temperature >= MAX_TT * 10:
         # 44° 温度过高通知
         if not os.path.exists(target):
             os.system(f'echo 1 > {target}')
