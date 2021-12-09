@@ -4,7 +4,7 @@
 # @Site    : x-item.com
 # @Software: PyCharm
 # @Create  : 2021/11/25 15:42
-# @Update  : 2021/12/8 18:12
+# @Update  : 2021/12/9 14:59
 # @Detail  : 自动充电
 
 import logging
@@ -78,7 +78,7 @@ def main():
     log.debug(f'AC: {ac}, CHARGE: {charge}, STATE: {status}, TP: {temperature / 10}')
 
     # 温度文件
-    target = 'py.ht'
+    target = os.path.join(os.path.dirname(__file__), 'py.ht')
 
     if charge <= MIN_POWER and ac is False:
         result = power.on()
@@ -89,7 +89,7 @@ def main():
         msg_push(f'充电完成, 开关状态变更: {result}')
 
     elif temperature >= MAX_TT * 10:
-        # 44° 温度过高通知
+        # 温度过高通知
         if not os.path.exists(target):
             os.system(f'echo 1 > {target}')
         else:
@@ -97,15 +97,19 @@ def main():
                 count = int(f.read())
                 log.warning(f'temperature anomaly, count: {count + 1}')
                 if count >= TTC:
-                    f.seek(0)
-                    f.write('0')
                     if ac is True:
                         result = power.off()
                     msg_push(f'目前温度异常，请及时检查。温度: {temperature / 10}°, 已关闭开关: {result}, 当前电量: {charge}')
                 else:
                     f.seek(0)
                     f.write(str(count + 1))
-    elif temperature <= MIN_TT and os.path.exists(target):
+    elif temperature <= MIN_TT * 10 and os.path.exists(target):
+        with open(target) as f:
+            count = int(f.read())
+            if count >= TTC:
+                if ac is False:
+                    result = power.on()
+                    msg_push(f'温度已恢复正常值{temperature / 10}°, 继续充电，开关: {result}, 当前电量: {charge}')
         os.remove(target)
 
 
